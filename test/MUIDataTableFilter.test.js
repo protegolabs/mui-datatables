@@ -8,6 +8,10 @@ import Checkbox from '@material-ui/core/Checkbox';
 import TextField from '@material-ui/core/TextField';
 import TableFilter from '../src/components/TableFilter';
 import Typography from '@material-ui/core/Typography';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import ListItemText from '@material-ui/core/ListItemText';
+
+const Levels = ['Low', 'Normal', 'High'];
 
 describe('<TableFilter />', function() {
   let data;
@@ -276,4 +280,94 @@ describe('<TableFilter />', function() {
       .simulate('change', event);
     assert.strictEqual(onFilterUpdate.callCount, 3);
   });
+
+    context('customFilterListRender', () => {
+        beforeEach(() => {
+            columns = [...columns, {
+                name: 'level', label: 'Level', display: true, sort: true, filter: true, sortDirection: 'desc',
+                customFilterListRender: level => Levels[level]
+            }];
+            data = [...data, [0, 2, 1, 2]];
+            filterData = [...filterData, [0, 1, 2]];
+        });
+
+        it('test that all checkbox display the right content using customFilterListRender', () => {
+            const options = {filterType: 'checkbox', textLabels};
+            const filterList = [[], [], [], [], []];
+            const shallowWrapper = mount(
+                <TableFilter columns={columns} filterData={filterData} filterList={filterList} options={options}/>,
+            );
+
+            const actualResult = shallowWrapper
+                .find(FormControlLabel)
+                .map(x => x.prop('label'))
+                .filter(label => Levels.includes(label));
+
+            assert.strictEqual(actualResult.length, 3);
+            assert.strictEqual(actualResult[0], Levels[0]);
+            assert.strictEqual(actualResult[1], Levels[1]);
+            assert.strictEqual(actualResult[2], Levels[2]);
+        });
+
+      it('test that all select display the right content using customFilterListRender', () => {
+        const options = { filterType: 'select', textLabels };
+        const filterList = [[], [], [], [], []];
+        const onFilterUpdate = spy();
+
+        const shallowWrapper = shallow(
+            <TableFilter
+                columns={columns}
+                onFilterUpdate={onFilterUpdate}
+                filterData={filterData}
+                filterList={filterList}
+                options={options}
+            />,
+        ).dive();
+
+        const selectLevel = shallowWrapper
+            .find(Select)
+            .last();
+
+        assert.strictEqual(selectLevel.prop('name'), 'level');
+
+        const renderedOptions = selectLevel
+            .children()
+            .children()
+            .map(x=> x.text());
+
+        assert.sameOrderedMembers(renderedOptions, ['All'].concat(Levels));
+
+      });
+
+      it('test that all multiselect display the right content using customFilterListRender', () => {
+        const options = { filterType: 'multiselect', textLabels };
+        const filterList = [[], [], [], [], []];
+        const onFilterUpdate = spy();
+
+        const shallowWrapper = shallow(
+            <TableFilter
+                columns={columns}
+                onFilterUpdate={onFilterUpdate}
+                filterData={filterData}
+                filterList={filterList}
+                options={options}
+            />,
+        ).dive();
+
+        const selectLevel = shallowWrapper
+            .find(Select)
+            .last();
+
+        assert.strictEqual(selectLevel.prop('name'), 'level');
+
+        const renderedOptions = selectLevel
+            .find(ListItemText)
+            .map(childs => childs.prop('primary'));
+
+        assert.sameOrderedMembers(renderedOptions, Levels);
+
+        const multiSelectValues = selectLevel.prop('renderValue')([0, 2]);
+        assert.sameOrderedMembers(multiSelectValues, [Levels[0], ', ', Levels[2]]);
+      });
+    });
 });
