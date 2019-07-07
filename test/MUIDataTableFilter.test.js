@@ -1,15 +1,15 @@
-import React from 'react';
-import { spy, stub } from 'sinon';
-import { mount, shallow } from 'enzyme';
-import { assert, expect, should } from 'chai';
-import textLabels from '../src/textLabels';
-import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
+import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
-import TableFilter from '../src/components/TableFilter';
 import Typography from '@material-ui/core/Typography';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import ListItemText from '@material-ui/core/ListItemText';
+import { assert } from 'chai';
+import { mount, shallow } from 'enzyme';
+import React from 'react';
+import { spy } from 'sinon';
+import TableFilter from '../src/components/TableFilter';
+import textLabels from '../src/textLabels';
 
 const Levels = ['Low', 'Normal', 'High'];
 
@@ -54,7 +54,7 @@ describe('<TableFilter />', function() {
     assert.deepEqual(labels, ['First Name', 'Company', 'City Label', 'State']);
   });
 
-  it("should data table filter view with checkboxes if filterType = 'checkbox'", () => {
+  it("should render data table filter view with checkboxes if filterType = 'checkbox'", () => {
     const options = { filterType: 'checkbox', textLabels };
     const filterList = [[], [], [], []];
     const shallowWrapper = mount(
@@ -65,20 +65,20 @@ describe('<TableFilter />', function() {
     assert.strictEqual(actualResult.length, 13);
   });
 
-  it('should data table filter view with no checkboxes if filter=false for each column', () => {
+  it('should render data table filter view with no checkboxes if filter=false for each column', () => {
     const options = { filterType: 'checkbox', textLabels };
     const filterList = [[], [], [], []];
     columns = columns.map(item => (item.filter = false));
 
-    const shallowWrapper = mount(
+    const mountWrapper = mount(
       <TableFilter columns={columns} filterData={filterData} filterList={filterList} options={options} />,
     );
 
-    const actualResult = shallowWrapper.find(Checkbox);
+    const actualResult = mountWrapper.find(Checkbox);
     assert.strictEqual(actualResult.length, 0);
   });
 
-  it("should data table filter view with selects if filterType = 'select'", () => {
+  it("should render data table filter view with selects if filterType = 'select'", () => {
     const options = { filterType: 'select', textLabels };
     const filterList = [['Joe James'], [], [], []];
 
@@ -90,7 +90,7 @@ describe('<TableFilter />', function() {
     assert.strictEqual(actualResult.length, 4);
   });
 
-  it('should data table filter view no selects if filter=false for each column', () => {
+  it('should render data table filter view no selects if filter=false for each column', () => {
     const options = { filterType: 'select', textLabels };
     const filterList = [['Joe James'], [], [], []];
     columns = columns.map(item => (item.filter = false));
@@ -103,7 +103,7 @@ describe('<TableFilter />', function() {
     assert.strictEqual(actualResult.length, 0);
   });
 
-  it("should data table filter view with checkbox selects if filterType = 'multiselect'", () => {
+  it("should render data table filter view with checkbox selects if filterType = 'multiselect'", () => {
     const options = { filterType: 'multiselect', textLabels };
     const filterList = [['Joe James', 'John Walsh'], [], [], []];
 
@@ -113,6 +113,31 @@ describe('<TableFilter />', function() {
 
     const actualResult = mountWrapper.find(Select);
     assert.strictEqual(actualResult.length, 4);
+  });
+
+  it("should data table custom filter view with if filterType = 'custom' and a valid display filterOption is provided", () => {
+    const options = {
+      filterType: 'custom',
+      textLabels,
+      filterOptions: {
+        names: [],
+        logic(city, filters) {
+          return false;
+        },
+        display: (filterList, onChange, index, column) => (
+          <div>
+            <TextField id="custom-filter-render">Custom Filter Render</TextField>
+          </div>
+        ),
+      },
+    };
+    const filterList = [[], [], [], []];
+    const mountWrapper = mount(
+      <TableFilter columns={columns} filterData={filterData} filterList={filterList} options={options} />,
+    );
+
+    const actualResult = mountWrapper.find('#custom-filter-render');
+    assert.isAtLeast(actualResult.length, 1);
   });
 
   it("should render column.label as filter label if filterType = 'textField'", () => {
@@ -281,94 +306,95 @@ describe('<TableFilter />', function() {
     assert.strictEqual(onFilterUpdate.callCount, 3);
   });
 
-    context('customFilterListRender', () => {
-        beforeEach(() => {
-            columns = [...columns, {
-                name: 'level', label: 'Level', display: true, sort: true, filter: true, sortDirection: 'desc',
-                customFilterListRender: level => Levels[level]
-            }];
-            data = [...data, [0, 2, 1, 2]];
-            filterData = [...filterData, [0, 1, 2]];
-        });
-
-        it('test that all checkbox display the right content using customFilterListRender', () => {
-            const options = {filterType: 'checkbox', textLabels};
-            const filterList = [[], [], [], [], []];
-            const shallowWrapper = mount(
-                <TableFilter columns={columns} filterData={filterData} filterList={filterList} options={options}/>,
-            );
-
-            const actualResult = shallowWrapper
-                .find(FormControlLabel)
-                .map(x => x.prop('label'))
-                .filter(label => Levels.includes(label));
-
-            assert.strictEqual(actualResult.length, 3);
-            assert.strictEqual(actualResult[0], Levels[0]);
-            assert.strictEqual(actualResult[1], Levels[1]);
-            assert.strictEqual(actualResult[2], Levels[2]);
-        });
-
-      it('test that all select display the right content using customFilterListRender', () => {
-        const options = { filterType: 'select', textLabels };
-        const filterList = [[], [], [], [], []];
-        const onFilterUpdate = spy();
-
-        const shallowWrapper = shallow(
-            <TableFilter
-                columns={columns}
-                onFilterUpdate={onFilterUpdate}
-                filterData={filterData}
-                filterList={filterList}
-                options={options}
-            />,
-        ).dive();
-
-        const selectLevel = shallowWrapper
-            .find(Select)
-            .last();
-
-        assert.strictEqual(selectLevel.prop('name'), 'level');
-
-        const renderedOptions = selectLevel
-            .children()
-            .children()
-            .map(x=> x.text());
-
-        assert.sameOrderedMembers(renderedOptions, ['All'].concat(Levels));
-
-      });
-
-      it('test that all multiselect display the right content using customFilterListRender', () => {
-        const options = { filterType: 'multiselect', textLabels };
-        const filterList = [[], [], [], [], []];
-        const onFilterUpdate = spy();
-
-        const shallowWrapper = shallow(
-            <TableFilter
-                columns={columns}
-                onFilterUpdate={onFilterUpdate}
-                filterData={filterData}
-                filterList={filterList}
-                options={options}
-            />,
-        ).dive();
-
-        const selectLevel = shallowWrapper
-            .find(Select)
-            .last();
-
-        assert.strictEqual(selectLevel.prop('name'), 'level');
-
-        const renderedOptions = selectLevel
-            .find(ListItemText)
-            .map(childs => childs.prop('primary'));
-
-        const excpectedLevelsArray = Levels.map((x, i) => [x, i]).flat();
-        assert.sameOrderedMembers(renderedOptions, excpectedLevelsArray);
-
-        const multiSelectValues = selectLevel.prop('renderValue')([0, 2]);
-        assert.sameOrderedMembers(multiSelectValues, [Levels[0], ', ', Levels[2]]);
-      });
+  context('customFilterListRender', () => {
+    beforeEach(() => {
+      columns = [
+        ...columns,
+        {
+          name: 'level',
+          label: 'Level',
+          display: true,
+          sort: true,
+          filter: true,
+          sortDirection: 'desc',
+          customFilterListRender: level => Levels[level],
+        },
+      ];
+      data = [...data, [0, 2, 1, 2]];
+      filterData = [...filterData, [0, 1, 2]];
     });
+
+    it('test that all checkbox display the right content using customFilterListRender', () => {
+      const options = { filterType: 'checkbox', textLabels };
+      const filterList = [[], [], [], [], []];
+      const shallowWrapper = mount(
+        <TableFilter columns={columns} filterData={filterData} filterList={filterList} options={options} />,
+      );
+
+      const actualResult = shallowWrapper
+        .find(FormControlLabel)
+        .map(x => x.prop('label'))
+        .filter(label => Levels.includes(label));
+
+      assert.strictEqual(actualResult.length, 3);
+      assert.strictEqual(actualResult[0], Levels[0]);
+      assert.strictEqual(actualResult[1], Levels[1]);
+      assert.strictEqual(actualResult[2], Levels[2]);
+    });
+
+    it('test that all select display the right content using customFilterListRender', () => {
+      const options = { filterType: 'select', textLabels };
+      const filterList = [[], [], [], [], []];
+      const onFilterUpdate = spy();
+
+      const shallowWrapper = shallow(
+        <TableFilter
+          columns={columns}
+          onFilterUpdate={onFilterUpdate}
+          filterData={filterData}
+          filterList={filterList}
+          options={options}
+        />,
+      ).dive();
+
+      const selectLevel = shallowWrapper.find(Select).last();
+
+      assert.strictEqual(selectLevel.prop('name'), 'level');
+
+      const renderedOptions = selectLevel
+        .children()
+        .children()
+        .map(x => x.text());
+
+      assert.sameOrderedMembers(renderedOptions, ['All'].concat(Levels));
+    });
+
+    it('test that all multiselect display the right content using customFilterListRender', () => {
+      const options = { filterType: 'multiselect', textLabels };
+      const filterList = [[], [], [], [], []];
+      const onFilterUpdate = spy();
+
+      const shallowWrapper = shallow(
+        <TableFilter
+          columns={columns}
+          onFilterUpdate={onFilterUpdate}
+          filterData={filterData}
+          filterList={filterList}
+          options={options}
+        />,
+      ).dive();
+
+      const selectLevel = shallowWrapper.find(Select).last();
+
+      assert.strictEqual(selectLevel.prop('name'), 'level');
+
+      const renderedOptions = selectLevel.find(ListItemText).map(childs => childs.prop('primary'));
+
+      const excpectedLevelsArray = Levels.map((x, i) => [x, i]).flat();
+      assert.sameOrderedMembers(renderedOptions, excpectedLevelsArray);
+
+      const multiSelectValues = selectLevel.prop('renderValue')([0, 2]);
+      assert.sameOrderedMembers(multiSelectValues, [Levels[0], ', ', Levels[2]]);
+    });
+  });
 });
