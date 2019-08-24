@@ -1,6 +1,6 @@
 {
   "name": "mui-datatables",
-  "version": "2.6.1",
+  "version": "2.9.0",
   "description": "Datatables for React using Material-UI",
   "main": "dist/index.js",
   "files": [
@@ -44,7 +44,7 @@
     "babel-eslint": "^8.0.3",
     "babel-loader": "^7.1.2",
     "babel-plugin-external-helpers": "^6.22.0",
-    "babel-plugin-istanbul": "^4.1.5",
+    "babel-plugin-istanbul": "^5.2.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.10",
@@ -93,6 +93,7 @@
   },
   "dependencies": {
     "classnames": "^2.2.5",
+    "lodash.assign": "^4.2.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.find": "^4.6.0",
     "lodash.get": "^4.4.2",
