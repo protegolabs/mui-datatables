@@ -239,7 +239,7 @@ class MUIDataTable extends React.Component {
   }
 
   updateOptions(props) {
-    this.options = assign(this.options, props.options);
+    this.options = merge(this.options, props.options);
   }
 
   initializeTable(props) {

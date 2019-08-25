@@ -15,6 +15,7 @@ const defaultHeadCellStyles = theme => ({
     left: '0px',
     zIndex: 100,
     backgroundColor: theme.palette.background.paper,
+    cursor: 'default',
   },
   tooltip: {
     cursor: 'pointer',
@@ -30,7 +31,7 @@ const defaultHeadCellStyles = theme => ({
   sortAction: {
     display: 'flex',
     verticalAlign: 'top',
-    cursor: 'pointer',
+    cursor: 'default',
   },
   sortLabelRoot: {
     height: '10px',
