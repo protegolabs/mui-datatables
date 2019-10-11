@@ -108,7 +108,7 @@ class TableFilter extends React.Component {
 
   handleDropdownChange = (event, index, column) => {
     const labelFilterAll = this.props.options.textLabels.filter.all;
-    const value = event.target.value === labelFilterAll ? '' : event.target.value;
+    const value = event.target.value === labelFilterAll ? [] : [event.target.value];
     this.props.onFilterUpdate(index, value, column, 'dropdown');
   };
 
@@ -178,7 +178,7 @@ class TableFilter extends React.Component {
           <InputLabel htmlFor={column.name}>{column.label}</InputLabel>
           <Select
             fullWidth
-            value={filterList[index].toString() || textLabels.all}
+            value={filterList[index].length ? filterList[index].toString() : textLabels.all}
             name={column.name}
             onChange={event => this.handleDropdownChange(event, index, column.name)}
             input={<Input name={column.name} id={column.name} />}>
@@ -271,7 +271,7 @@ class TableFilter extends React.Component {
   }
 
   render() {
-    const { classes, columns, options, onFilterReset } = this.props;
+    const { classes, columns, options, onFilterReset, customFooter, filterList } = this.props;
     const textLabels = options.textLabels.filter;
     const filterGridColumns = columns.filter(col => col.filter).length === 1 ? 1 : 2;
 
@@ -314,6 +314,7 @@ class TableFilter extends React.Component {
             }
           })}
         </GridList>
+        {customFooter ? customFooter(filterList) : ''}
       </div>
     );
   }
