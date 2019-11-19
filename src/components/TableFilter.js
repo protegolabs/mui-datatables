@@ -262,7 +262,7 @@ class TableFilter extends React.Component {
     }
 
     return (
-      <GridListTile key={index} cols={1} classes={{ tile: classes.gridListTile }}>
+      <GridListTile key={index} cols={1}>
         <FormControl key={index} fullWidth>
           {display(filterList, this.handleCustomChange, index, column, filterData)}
         </FormControl>

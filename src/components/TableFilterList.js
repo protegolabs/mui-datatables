@@ -60,16 +60,16 @@ class TableFilterList extends React.Component {
       <div className={classes.root}>
         {serverSide
           ? serverSideFilterList.map((item, index) => {
-              if (columnNames[index].filterType === 'custom' && filterListRenderers[index](item)) {
-                return customFilterChip(item, index);
-              }
+              // if (columnNames[index].filterType === 'custom' && filterListRenderers[index](item)) {
+              //   return customFilterChip(item, index);
+              // }
 
               return item.map((data, colIndex) => filterChip(index, data, colIndex));
             })
           : filterList.map((item, index) => {
-              if (columnNames[index].filterType === 'custom' && filterListRenderers[index](item)) {
-                return customFilterChip(item, index);
-              }
+              // if (columnNames[index].filterType === 'custom' && filterListRenderers[index](item)) {
+              //   return customFilterChip(item, index);
+              // }
 
               return item.map((data, colIndex) => filterChip(index, data, colIndex));
             })}
